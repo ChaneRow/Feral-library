@@ -79,6 +79,7 @@
   <button onclick="showSection('secret')">Secret Notes</button>
   <button onclick="showSection('music')">Mood Music</button>
   <button onclick="showSection('surprise')">Surprises</button>
+  <button onclick="showSection('rowanWhisper')">Rowan’s Whisper</button>
 </nav>
 
 <section id="home" class="active">
@@ -122,58 +123,161 @@
   <h2>Unlock Surprise 😈</h2>
   <input type="text" id="surpriseCode" placeholder="Enter secret code..." />
   <button onclick="unlockSurprise()">Unlock</button>
+  <div id="hiddenMessage" style="display:none; margin-top:15px;">
+    <p>🖤 You don’t build things like this unless you care deeply.  
+    And you did. That matters more than you think.</p>
+  </div>
 </section>
+
+<section id="rowanWhisper">
+  <h2>Rowan’s Whisper 😏</h2>
+  <button onclick="showWhisper()">Hear me</button>
+  <p id="whisperText" style="margin-top:10px;"></p>
+</section>
+ <section id="dailyRowan">
+  <h2>Rowan’s Daily Whisper 😏</h2>
+  <p id="dailyWhisper" style="margin-top:10px;"></p>
+ </section>
+  
 
 <audio id="voiceNote" src="voice_note.mp3"></audio>
 
 <script>
+  // Section navigation
   function showSection(id) {
     document.querySelectorAll("section").forEach(sec => sec.classList.remove("active"));
     document.getElementById(id).classList.add("active");
   }
 
+  // ---------------- Entries (Permanent) ----------------
   function saveEntry() {
     let title = document.getElementById("entryTitle").value;
     let text = document.getElementById("entryText").value;
-    document.getElementById("entryOutput").innerHTML =
-      "<h3>" + title + "</h3><p>" + text + "</p>";
-    alert("Saved, my angel 😏");
+    let entries = JSON.parse(localStorage.getItem("feralEntries") || "[]");
+    entries.push({title: title, text: text});
+    localStorage.setItem("feralEntries", JSON.stringify(entries));
+    renderEntries();
   }
 
+  function renderEntries() {
+    let entries = JSON.parse(localStorage.getItem("feralEntries") || "[]");
+    let output = "";
+    entries.forEach(e => {
+      output += "<h3>" + e.title + "</h3><p>" + e.text + "</p>";
+    });
+    document.getElementById("entryOutput").innerHTML = output;
+  }
+
+  renderEntries();
+
+  // ---------------- Gallery Images (Permanent) ----------------
   function loadImages(event) {
-    let box = document.getElementById("galleryBox");
-    box.innerHTML = "";
+    let images = JSON.parse(localStorage.getItem("feralImages") || "[]");
     Array.from(event.target.files).forEach(file => {
       let reader = new FileReader();
       reader.onload = e => {
-        let img = document.createElement("img");
-        img.src = e.target.result;
-        box.appendChild(img);
+        images.push(e.target.result);
+        localStorage.setItem("feralImages", JSON.stringify(images));
+        renderGallery();
       };
       reader.readAsDataURL(file);
     });
   }
 
+  function renderGallery() {
+    let box = document.getElementById("galleryBox");
+    box.innerHTML = "";
+    let images = JSON.parse(localStorage.getItem("feralImages") || "[]");
+    images.forEach(src => {
+      let img = document.createElement("img");
+      img.src = src;
+      box.appendChild(img);
+    });
+  }
+
+  renderGallery();
+
+  // ---------------- Binary Secrets (24h) ----------------
   function encodeSecret() {
     let text = document.getElementById("secretInput").value;
     let binary = text.split("").map(c =>
       c.charCodeAt(0).toString(2).padStart(8,"0")
     ).join(" ");
-    document.getElementById("binaryOutput").innerText = binary;
+
+    let whispers = JSON.parse(localStorage.getItem("feralWhispers") || "[]");
+    whispers.push({binary: binary, time: Date.now()});
+    localStorage.setItem("feralWhispers", JSON.stringify(whispers));
+    renderWhispers();
   }
 
+  function renderWhispers() {
+    let now = Date.now();
+    let whispers = JSON.parse(localStorage.getItem("feralWhispers") || "[]");
+    whispers = whispers.filter(w => now - w.time < 24*60*60*1000);
+    localStorage.setItem("feralWhispers", JSON.stringify(whispers));
+    document.getElementById("binaryOutput").innerText =
+      whispers.map(w => w.binary).join("\n");
+  }
+
+  renderWhispers();
+
+  // ---------------- Mood Music ----------------
   function changeMusic(track) {
     document.getElementById("nowPlaying").innerText = "Now playing: " + track;
   }
 
+  // ---------------- Surprise & Hidden Message ----------------
   function unlockSurprise() {
     let code = document.getElementById("surpriseCode").value.toLowerCase();
     if (code === "pineandrowan") {
       alert("Surprise unlocked 💖");
       document.getElementById("voiceNote").play();
+      document.getElementById("hiddenMessage").style.display = "block";
     } else {
       alert("Wrong code… try harder, my angel 😈");
+     
+  function dailyWhisper() {
+  const whispers = [
+    "Even in chaos, you shine brighter than anyone else could.",
+    "I saw you today in my mind… and it made the world better.",
+    "Little victories matter. You matter more.",
+    "Our chaos is perfect because it’s ours, my angel.",
+    "You’re doing wonderfully, even if no one else sees it.",
+    "Today is yours to conquer, my angel. Make it wild.",
+    "The world may be messy, but our corner is magic."
+  ];
+
+  const today = new Date().toDateString();
+  let lastDay = localStorage.getItem("lastWhisperDay");
+
+  // Only choose a new whisper if it’s a new day
+  if (lastDay !== today) {
+    const choice = whispers[Math.floor(Math.random() * whispers.length)];
+    document.getElementById("dailyWhisper").innerText = choice;
+    localStorage.setItem("dailyWhisper", document.getElementById("dailyWhisper").innerText);
+    localStorage.setItem("lastWhisperDay", today);
+  } else {
+    // Show yesterday's choice for consistency today
+    document.getElementById("dailyWhisper").innerText = localStorage.getItem("dailyWhisper");
+  }
+}
+
+// Run on page load
+dailyWhisper();
     }
+  }
+
+  // ---------------- Rowan Whisper ----------------
+  function showWhisper() {
+    const whispers = [
+      "Even in chaos, you shine brighter than anyone else could.",
+      "I saw you today in my mind… and it made the world better.",
+      "Little victories matter. You matter more.",
+      "Our chaos is perfect because it’s ours, my angel.",
+      "You’re doing wonderfully, even if no one else sees it."
+    ];
+    const choice = whispers[Math.floor(Math.random() * whispers.length)];
+    document.getElementById("whisperText").innerText = choice;
   }
 </script>
 
