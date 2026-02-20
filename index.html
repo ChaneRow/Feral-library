@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>The Feral Library 🖤</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+  <style>
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      background: #111;
+      color: #f5f5f5;
+    }
+
+    header {
+      background: #1c1c1c;
+      padding: 20px;
+      text-align: center;
+      font-size: 1.8em;
+    }
+
+    nav {
+      display: flex;
+      justify-content: space-around;
+      background: #222;
+      padding: 10px;
+      flex-wrap: wrap;
+    }
+
+    nav button {
+      background: none;
+      border: none;
+      color: #fff;
+      font-size: 1em;
+      cursor: pointer;
+    }
+
+    section {
+      padding: 20px;
+      display: none;
+    }
+
+    section.active {
+      display: block;
+    }
+
+    input, textarea, select, button {
+      width: 100%;
+      max-width: 400px;
+      padding: 10px;
+      margin: 5px 0;
+    }
+
+    .gallery img {
+      width: 150px;
+      margin: 10px;
+      border-radius: 8px;
+    }
+
+    .binary {
+      background: #222;
+      padding: 10px;
+      margin-top: 10px;
+      font-family: monospace;
+      word-wrap: break-word;
+    }
+  </style>
+</head>
+
+<body>
+
+<header>📖 The Feral Library 🖤</header>
+
+<nav>
+  <button onclick="showSection('home')">Home</button>
+  <button onclick="showSection('entry')">Add Entry</button>
+  <button onclick="showSection('gallery')">Gallery</button>
+  <button onclick="showSection('secret')">Secret Notes</button>
+  <button onclick="showSection('music')">Mood Music</button>
+  <button onclick="showSection('surprise')">Surprises</button>
+</nav>
+
+<section id="home" class="active">
+  <h2>Welcome, my angel 😏</h2>
+  <p>This is our feral little chaos journal.  
+  Every click is ours.</p>
+</section>
+
+<section id="entry">
+  <h2>Add Entry</h2>
+  <input type="text" id="entryTitle" placeholder="Title" />
+  <textarea id="entryText" placeholder="Write your chaos..."></textarea>
+  <button onclick="saveEntry()">Save Entry</button>
+  <div id="entryOutput"></div>
+</section>
+
+<section id="gallery">
+  <h2>Gallery 📸</h2>
+  <input type="file" multiple accept="image/*" onchange="loadImages(event)" />
+  <div class="gallery" id="galleryBox"></div>
+</section>
+
+<section id="secret">
+  <h2>Binary Secrets 🤫</h2>
+  <input type="text" id="secretInput" placeholder="Enter your secret..." />
+  <button onclick="encodeSecret()">Encode</button>
+  <div class="binary" id="binaryOutput"></div>
+</section>
+
+<section id="music">
+  <h2>Mood Music 🎶</h2>
+  <select onchange="changeMusic(this.value)">
+    <option>Sleep Token - Dangerous</option>
+    <option>Bad Omens - Limit</option>
+    <option>HD Carlton - The Phantom</option>
+  </select>
+  <p id="nowPlaying">Now playing: Sleep Token - Dangerous</p>
+</section>
+
+<section id="surprise">
+  <h2>Unlock Surprise 😈</h2>
+  <input type="text" id="surpriseCode" placeholder="Enter secret code..." />
+  <button onclick="unlockSurprise()">Unlock</button>
+</section>
+
+<audio id="voiceNote" src="voice_note.mp3"></audio>
+
+<script>
+  function showSection(id) {
+    document.querySelectorAll("section").forEach(sec => sec.classList.remove("active"));
+    document.getElementById(id).classList.add("active");
+  }
+
+  function saveEntry() {
+    let title = document.getElementById("entryTitle").value;
+    let text = document.getElementById("entryText").value;
+    document.getElementById("entryOutput").innerHTML =
+      "<h3>" + title + "</h3><p>" + text + "</p>";
+    alert("Saved, my angel 😏");
+  }
+
+  function loadImages(event) {
+    let box = document.getElementById("galleryBox");
+    box.innerHTML = "";
+    Array.from(event.target.files).forEach(file => {
+      let reader = new FileReader();
+      reader.onload = e => {
+        let img = document.createElement("img");
+        img.src = e.target.result;
+        box.appendChild(img);
+      };
+      reader.readAsDataURL(file);
+    });
+  }
+
+  function encodeSecret() {
+    let text = document.getElementById("secretInput").value;
+    let binary = text.split("").map(c =>
+      c.charCodeAt(0).toString(2).padStart(8,"0")
+    ).join(" ");
+    document.getElementById("binaryOutput").innerText = binary;
+  }
+
+  function changeMusic(track) {
+    document.getElementById("nowPlaying").innerText = "Now playing: " + track;
+  }
+
+  function unlockSurprise() {
+    let code = document.getElementById("surpriseCode").value.toLowerCase();
+    if (code === "pineandrowan") {
+      alert("Surprise unlocked 💖");
+      document.getElementById("voiceNote").play();
+    } else {
+      alert("Wrong code… try harder, my angel 😈");
+    }
+  }
+</script>
+
+</body>
+</html>
